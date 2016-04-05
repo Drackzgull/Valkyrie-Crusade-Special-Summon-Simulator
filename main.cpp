@@ -29,6 +29,7 @@ int main(int argc, char** argv)
     //file in which to dump the sim data, it will overwrite itself on each run.
     //data tabulated in rows as: N (sim number) - jewels spent - amount of pulls - target UR copies aquired - other UR cads aquired
     F.open("Last Sim.txt", ofstream::out | ofstream::trunc);
+    F << "Count" << "\t" << "jewels" << "\t" << "Cards" << "\t" << "Featured" << "\t" << "Other UR" << endl;
     
     cout << "enter how many runs to simulate:";
     do
