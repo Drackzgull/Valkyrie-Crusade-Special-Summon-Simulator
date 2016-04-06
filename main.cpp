@@ -1,9 +1,5 @@
 // ConsoleApplication1.cpp : Defines the entry point for the console application.
 //
-
-#include "stdafx.h"
-
-
 /*
 * File:   main.cpp
 * Author: Drackzgull
@@ -23,7 +19,7 @@ unsigned seed = chrono::system_clock::now().time_since_epoch().count();
 default_random_engine g(seed);
 uniform_int_distribution<unsigned> rd(1, 100);
 
-//provide F stream reference and number of iterations to run.
+//provide F stream reference and number of iterations to run, special summon function.
 void special_summon(ofstream& F, int N, int jewel_limit, int success) {
 	bool use_jewel_limit;
 	if (jewel_limit == 0) use_jewel_limit = false;
@@ -70,7 +66,6 @@ void special_summon(ofstream& F, int N, int jewel_limit, int success) {
 		jewels = 0;
 		get = 0;
 		UR = 0;
-		flag = false;
 	}
 }
 
