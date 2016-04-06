@@ -69,6 +69,81 @@ void special_summon(ofstream& F, int N, int jewel_limit, int success) {
 	}
 }
 
+void box_summon_11(ofstream& F, int N, int jewel_limit, int success)
+{
+	bool use_jewel_limit;
+	if (jewel_limit == 0) use_jewel_limit = false;
+	else use_jewel_limit = true;
+	unsigned chance = 1,                                        //chance of getting an UR
+		jewels = 0,                                         //jewels spent
+		get = 0,                                            //event UR copies aquired
+		UR = 0;                                             //other UR cards aquired
+	F << "Count" << "\t" << "jewels" << "\t" << "Cards" << "\t" << "Featured" << "\t" << "Other UR";
+	if (use_jewel_limit == true) F << "\t" << "success?";
+	F << endl;
+	for (int i = 0; i < N; i++)
+	{
+		//if no jewel limit, run till sucess.  if jewel limit, either run till success OR run till out of jewels.
+		while ((get < success && use_jewel_limit == false) || (get < success && use_jewel_limit == true && ((jewels + 3000) <= jewel_limit)))
+		{
+			//build box summon 
+			bool reset_box = false,
+				got_featured = false,
+				got_other_UR = false;
+			unsigned box_count = 0;
+			//while there's no need to reset box...
+			while ((reset_box == false && use_jewel_limit == false) || (reset_box == false && use_jewel_limit == true && ((jewels + 3000) <= jewel_limit)))
+			{
+				//do an 11 summon
+				jewels += 3000;
+				box_count += 11;
+				for (int j = 0; j < 11; j++)
+				{
+					if (rd(g) <= chance)
+					{
+						//if you received both URs do nothing.  If you received 1 UR get the other.
+						if (got_other_UR == true && got_featured == true) {}
+						else if ((rd(g) <= 50 && got_featured == false) || got_other_UR == true) {
+							get++;
+							reset_box = true;
+							got_featured = true;
+						}
+						else {
+							UR++;
+							got_other_UR = true;
+						}
+					}
+				}
+				//if you drew all the cards...
+				if (box_count == 77) 
+				{
+					//if you didn't already get both URs, get them.  then reset the box stats.
+					if (got_featured == false) get++;
+					if (got_other_UR == false) UR++;
+					reset_box = true;
+				}
+			}
+		}
+		F << i + 1 << "\t" << jewels << "\t" << jewels * 11 / 3000 << "\t" << get << "\t" << UR;
+		if (use_jewel_limit == true) {
+			if (get < success) F << "\t" << "no";
+			else F << "\t" << "yes";
+		}
+		F << endl;
+		jewels = 0;
+		get = 0;
+		UR = 0;
+	}
+}
+
+void box_summon_1(ofstream& F, int N, int jewel_limit, int success);
+
+void step_up_summon(ofstream& F, int N, int jewel_limit, int success);
+
+void flip_dx_summon(ofstream& F, int N, int jewel_limit, int success);
+
+void premium_hyper_summon(ofstream& F, int N, int jewel_limit, int success);
+
 
 int main(int argc, char** argv)
 {
