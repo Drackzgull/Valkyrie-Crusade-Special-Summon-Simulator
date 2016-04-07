@@ -29,7 +29,6 @@ void special_summon(ofstream& F, int N, int jewel_limit, int success) {
 		get = 0,                                            //event UR copies aquired
 		UR = 0;                                             //other UR cards aquired
 	bool flag = false;
-	bool result = true;
 	F << "Count" << "\t" << "jewels" << "\t" << "Cards" << "\t" << "Featured" << "\t" << "Other UR";
 	if (use_jewel_limit == true) F << "\t" << "success?";
 	F << endl;
@@ -203,7 +202,7 @@ void box_summon_1(ofstream& F, int N, int jewel_limit, int success)
 					}
 				}
 			}
-			F << i + 1 << "\t" << jewels << "\t" << jewels * 11 / 3000 << "\t" << get << "\t" << UR;
+			F << i + 1 << "\t" << jewels << "\t" << jewels / 300 << "\t" << get << "\t" << UR;
 			if (use_jewel_limit == true) {
 				if (get < success) F << "\t" << "no";
 				else F << "\t" << "yes";
@@ -216,7 +215,95 @@ void box_summon_1(ofstream& F, int N, int jewel_limit, int success)
 	}
 }
 
-void step_up_summon(ofstream& F, int N, int jewel_limit, int success);
+void step_up_summon(ofstream& F, int N, int jewel_limit, int success) { 
+	bool use_jewel_limit;
+	if (jewel_limit == 0) use_jewel_limit = false;
+	else use_jewel_limit = true;
+	unsigned chance = 1,                                        //chance of getting an UR
+		jewels = 0,                                         //jewels spent
+		get = 0,                                            //event UR copies aquired
+		alt = 0,
+		UR = 0,												//other UR cards aquired
+		steps = 0,
+		cards = 0,
+		next_step_cost = 0;												
+	bool flag = false;
+	F << "Count" << "\t" << "jewels" << "\t" << "steps" << "\t" << "Cards" << "\t" << "Featured" << "\t" << "Alt Featured" << "\t" << "Other UR";
+	if (use_jewel_limit == true) F << "\t" << "success?";
+	F << endl;
+	for (int i = 0; i < N; i++)
+	{
+		//if no jewel limit, run till sucess.  if jewel limit, either run till success OR run till out of jewels.
+		while ((get < success && use_jewel_limit == false) || (get < success && use_jewel_limit == true && ((jewels + next_step_cost) <= jewel_limit)))
+		{
+			jewels += next_step_cost;
+			int cards_to_draw = 0;
+			if (steps % 4 == 0)
+			{
+				cards_to_draw = 1;
+				chance = 1;
+				cards += 1;
+				next_step_cost = 600;
+			}
+			if (steps % 4 == 1)
+			{
+				cards_to_draw = 3;
+				chance = 2;
+				cards += 3;
+				next_step_cost = 1200;
+			}
+			if (steps % 4 == 2)
+			{
+				cards_to_draw = 5;
+				chance = 3;
+				cards += 5;
+				next_step_cost = 3000;
+			}
+			if (steps % 4 == 3)
+			{
+				cards_to_draw = 10;
+				cards += 11;
+				chance = 4;
+				next_step_cost = 100;
+				if (steps % 8 == 7)
+				{
+					if (rd(g) <= 50)
+						get++;
+					else
+						alt++;
+				}
+			}
+			for (int j = 0; j < cards_to_draw; j++)
+			{
+				if (rd(g) <= chance)
+				{
+					int temp = rd(g);
+					if (temp <= 25)
+						get++;
+					else if (temp <= 50)
+						alt++;
+					else
+						UR++;
+				}
+			}
+			steps++;
+		}
+		F << i + 1 << "\t" << jewels << "\t" << steps << "\t" << cards << "\t" << get << "\t" << alt << "\t" << UR;
+		if (use_jewel_limit == true) {
+			if (get < success) F << "\t" << "no";
+			else F << "\t" << "yes";
+		}
+		F << endl;
+		steps = 0;
+		chance = 1;
+		jewels = 0;
+		alt = 0;
+		cards = 0;
+		next_step_cost = 0;
+		get = 0;
+		UR = 0;
+	}
+}
 
 void flip_dx_summon(ofstream& F, int N, int jewel_limit, int success)
 {
@@ -268,8 +355,49 @@ void flip_dx_summon(ofstream& F, int N, int jewel_limit, int success)
 	}
 }
 
-void premium_hyper_summon(ofstream& F, int N, int jewel_limit, int success);
+void premium_hyper_summon(ofstream& F, int N, int jewel_limit, int success)
+{
+	bool use_jewel_limit;
+	if (jewel_limit == 0) use_jewel_limit = false;
+	else use_jewel_limit = true;
+	unsigned chance = 3,                                        //chance of getting an UR
+		jewels = 0,                                         //jewels spent
+		get = 0,                                            //event UR copies aquired
+		UR = 0;                                             //other UR cards aquired
+	F << "Count" << "\t" << "jewels" << "\t" << "Cards" << "\t" << "Featured" << "\t" << "Other UR";
+	if (use_jewel_limit == true) F << "\t" << "success?";
+	F << endl;
+	for (int i = 0; i < N; i++)
+	{
+		//if no jewel limit, run till sucess.  if jewel limit, either run till success OR run till out of jewels.
+		while ((get < success && use_jewel_limit == false) || (get < success && use_jewel_limit == true && ((jewels + 3000) <= jewel_limit)))
+		{
+			jewels += 3000;
+			for (int j = 0; j < 11; j++)
+			{
+				if (rd(g) <= chance)
+				{
+					if (rd(g) <= 50)
+						get++;
+					else
+						UR++;
+				}
+			}
+		}
+		F << i + 1 << "\t" << jewels << "\t" << jewels * 11 / 3000 << "\t" << get << "\t" << UR;
+		if (use_jewel_limit == true) {
+			if (get < success) F << "\t" << "no";
+			else F << "\t" << "yes";
+		}
+		F << endl;
+		chance = 1;
+		jewels = 0;
+		get = 0;
+		UR = 0;
+	}
+}
 
+void poi_summon(ofstream& F, int N, int rt_limit, int success);
 
 int main(int argc, char** argv)
 {
@@ -284,16 +412,16 @@ int main(int argc, char** argv)
 	//data tabulated in rows as: N (sim number) - jewels spent - amount of pulls - target UR copies aquired - other UR cads aquired
 	F.open("Last Sim.txt", ofstream::out | ofstream::trunc);
 
-	cout << "enter type of summon:" << endl << "S: Special Summon" << endl << "B: Box summon" << endl << "F: Flip DX summon" << endl;
+	cout << "enter type of summon:" << endl << "S: Special Summon" << endl << "B: Box summon" << endl << "F: Flip DX summon" << endl << "U: Step Up summon" << endl;
 
 	do {
 		cin >> summon_type;
-		if (summon_type == 'S' || summon_type == 'B' || summon_type == 'F') valid_summon = true;
+		if (summon_type == 'S' || summon_type == 'B' || summon_type == 'F' || summon_type == 'P' || summon_type == 'U') valid_summon = true;
 		else cout << "please enter a valid summon type" << endl;
 	} while (valid_summon == false);
 	
 	cout << endl;
-	cout << "enter how many runs to simulate:";
+	cout << "enter how many runs to simulate:" << endl;
 	do
 	{ 
 		cin >> N;
@@ -330,5 +458,7 @@ int main(int argc, char** argv)
 		else box_summon_11(F, N, jewel_limit, success);
 	}
 	else if (summon_type == 'F') flip_dx_summon(F, N, jewel_limit, success);
+	else if (summon_type == 'P') premium_hyper_summon(F, N, jewel_limit, success);
+	else if (summon_type == 'U') step_up_summon(F, N, jewel_limit, success);
 	return 0;
 }
