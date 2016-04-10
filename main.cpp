@@ -21,6 +21,7 @@ uniform_int_distribution<unsigned> rd(1, 100);
 
 //provide F stream reference and number of iterations to run, special summon function.
 void special_summon(ofstream& F, int N, int jewel_limit, int success) {
+	if (success == 0) success = 99999999;
 	bool use_jewel_limit;
 	if (jewel_limit == 0) use_jewel_limit = false;
 	else use_jewel_limit = true;
@@ -30,12 +31,12 @@ void special_summon(ofstream& F, int N, int jewel_limit, int success) {
 		UR = 0;                                             //other UR cards aquired
 	bool flag = false;
 	F << "Count" << "\t" << "jewels" << "\t" << "Cards" << "\t" << "Featured" << "\t" << "Other UR";
-	if (use_jewel_limit == true) F << "\t" << "success?";
+	if (use_jewel_limit) F << "\t" << "success?";
 	F << endl;
 	for (int i = 0; i < N; i++)
 	{
 		//if no jewel limit, run till sucess.  if jewel limit, either run till success OR run till out of jewels.
-		while ((get < success && use_jewel_limit == false) || (get < success && use_jewel_limit == true && ((jewels + 3000) <= jewel_limit)))
+		while ((get < success && !use_jewel_limit) || (get < success && use_jewel_limit && ((jewels + 3000) <= jewel_limit)))
 		{
 			jewels += 3000;
 			for (int j = 0; j < 11; j++)
@@ -56,7 +57,7 @@ void special_summon(ofstream& F, int N, int jewel_limit, int success) {
 			flag = false;
 		}
 		F << i + 1 << "\t" << jewels << "\t" << jewels * 11 / 3000 << "\t" << get << "\t" << UR;
-		if (use_jewel_limit == true) {
+		if (use_jewel_limit) {
 			if (get < success) F << "\t" << "no";
 			else F << "\t" << "yes";
 		}
@@ -70,6 +71,7 @@ void special_summon(ofstream& F, int N, int jewel_limit, int success) {
 
 void box_summon_11(ofstream& F, int N, int jewel_limit, int success)
 {
+	if (success == 0) success = 99999999;
 	bool use_jewel_limit;
 	if (jewel_limit == 0) use_jewel_limit = false;
 	else use_jewel_limit = true;
@@ -83,7 +85,7 @@ void box_summon_11(ofstream& F, int N, int jewel_limit, int success)
 	for (int i = 0; i < N; i++)
 	{
 		//if no jewel limit, run till sucess.  if jewel limit, either run till success OR run till out of jewels.
-		while ((get < success && use_jewel_limit == false) || (get < success && use_jewel_limit == true && ((jewels + 3000) <= jewel_limit)))
+		while ((get < success && !use_jewel_limit) || (get < success && use_jewel_limit && ((jewels + 3000) <= jewel_limit)))
 		{
 			//build box summon 
 			bool reset_box = false,
@@ -91,7 +93,7 @@ void box_summon_11(ofstream& F, int N, int jewel_limit, int success)
 				got_other_UR = false;
 			unsigned box_count = 0;
 			//while there's no need to reset box...
-			while ((reset_box == false && use_jewel_limit == false) || (reset_box == false && use_jewel_limit == true && ((jewels + 3000) <= jewel_limit)))
+			while ((!reset_box && !use_jewel_limit) || (!reset_box && use_jewel_limit && ((jewels + 3000) <= jewel_limit)))
 			{
 				//do an 11 summon
 				jewels += 3000;
@@ -101,8 +103,8 @@ void box_summon_11(ofstream& F, int N, int jewel_limit, int success)
 					if (rd(g) <= chance)
 					{
 						//if you received both URs do nothing.  If you received 1 UR get the other.
-						if (got_other_UR == true && got_featured == true) {}
-						else if ((rd(g) <= 50 && got_featured == false) || got_other_UR == true) {
+						if (got_other_UR && got_featured) {}
+						else if ((rd(g) <= 50 && !got_featured) || got_other_UR) {
 							get++;
 							reset_box = true;
 							got_featured = true;
@@ -117,14 +119,14 @@ void box_summon_11(ofstream& F, int N, int jewel_limit, int success)
 				if (box_count == 77) 
 				{
 					//if you didn't already get both URs, get them.  then reset the box stats.
-					if (got_featured == false) get++;
-					if (got_other_UR == false) UR++;
+					if (!got_featured) get++;
+					if (!got_other_UR) UR++;
 					reset_box = true;
 				}
 			}
 		}
 		F << i + 1 << "\t" << jewels << "\t" << jewels * 11 / 3000 << "\t" << get << "\t" << UR;
-		if (use_jewel_limit == true) {
+		if (use_jewel_limit) {
 			if (get < success) F << "\t" << "no";
 			else F << "\t" << "yes";
 		}
@@ -138,6 +140,7 @@ void box_summon_11(ofstream& F, int N, int jewel_limit, int success)
 void box_summon_1(ofstream& F, int N, int jewel_limit, int success)
 {
 	{
+		if (success == 0) success = 99999999;
 		bool use_jewel_limit;
 		if (jewel_limit == 0) use_jewel_limit = false;
 		else use_jewel_limit = true;
@@ -151,7 +154,7 @@ void box_summon_1(ofstream& F, int N, int jewel_limit, int success)
 		for (int i = 0; i < N; i++)
 		{
 			//if no jewel limit, run till sucess.  if jewel limit, either run till success OR run till out of jewels.
-			while ((get < success && use_jewel_limit == false) || (get < success && use_jewel_limit == true && ((jewels + 3000) <= jewel_limit)))
+			while ((get < success && !use_jewel_limit) || (get < success && use_jewel_limit && ((jewels + 3000) <= jewel_limit)))
 			{
 				//build box summon 
 				bool reset_box = false,
@@ -159,7 +162,7 @@ void box_summon_1(ofstream& F, int N, int jewel_limit, int success)
 					got_other_UR = false;
 				unsigned box_count = 0;
 				//while there's no need to reset box...
-				while ((reset_box == false && use_jewel_limit == false) || (reset_box == false && use_jewel_limit == true && ((jewels + 3000) <= jewel_limit)))
+				while ((!reset_box && !use_jewel_limit) || (!reset_box && use_jewel_limit && ((jewels + 3000) <= jewel_limit)))
 				{
 					//do an summon
 					jewels += 300;
@@ -167,8 +170,8 @@ void box_summon_1(ofstream& F, int N, int jewel_limit, int success)
 					if (rd(g) <= chance)
 						{
 							//if you received both URs do nothing.  If you received 1 UR get the other.
-							if (got_other_UR == true && got_featured == true) {}
-							else if ((rd(g) <= 50 && got_featured == false) || got_other_UR == true) {
+							if (got_other_UR && got_featured) {}
+							else if ((rd(g) <= 50 && !got_featured) || got_other_UR) {
 								get++;
 								reset_box = true;
 								got_featured = true;
@@ -182,7 +185,7 @@ void box_summon_1(ofstream& F, int N, int jewel_limit, int success)
 					if (box_count == 76)
 					{
 						//if you haven't gotten either UR yet, get one at random.
-						if (got_other_UR == false && got_featured == false)
+						if (!got_other_UR && !got_featured)
 							if ((rd(g) <= 50)) {
 								get++;
 								got_featured = true;
@@ -196,14 +199,14 @@ void box_summon_1(ofstream& F, int N, int jewel_limit, int success)
 					//receive the other UR you haven't gotten yet
 					if (box_count == 77)
 					{
-						if (got_featured == false) get++;
-						if (got_other_UR == false) UR++;
+						if (!got_featured) get++;
+						if (!got_other_UR) UR++;
 						reset_box = true;
 					}
 				}
 			}
 			F << i + 1 << "\t" << jewels << "\t" << jewels / 300 << "\t" << get << "\t" << UR;
-			if (use_jewel_limit == true) {
+			if (use_jewel_limit) {
 				if (get < success) F << "\t" << "no";
 				else F << "\t" << "yes";
 			}
@@ -216,6 +219,7 @@ void box_summon_1(ofstream& F, int N, int jewel_limit, int success)
 }
 
 void step_up_summon(ofstream& F, int N, int jewel_limit, int success) { 
+	if (success == 0) success = 99999999;
 	bool use_jewel_limit;
 	if (jewel_limit == 0) use_jewel_limit = false;
 	else use_jewel_limit = true;
@@ -229,12 +233,12 @@ void step_up_summon(ofstream& F, int N, int jewel_limit, int success) {
 		next_step_cost = 0;												
 	bool flag = false;
 	F << "Count" << "\t" << "jewels" << "\t" << "steps" << "\t" << "Cards" << "\t" << "Featured" << "\t" << "Alt Featured" << "\t" << "Other UR";
-	if (use_jewel_limit == true) F << "\t" << "success?";
+	if (use_jewel_limit) F << "\t" << "success?";
 	F << endl;
 	for (int i = 0; i < N; i++)
 	{
 		//if no jewel limit, run till sucess.  if jewel limit, either run till success OR run till out of jewels.
-		while ((get < success && use_jewel_limit == false) || (get < success && use_jewel_limit == true && ((jewels + next_step_cost) <= jewel_limit)))
+		while ((get < success && !use_jewel_limit) || (get < success && use_jewel_limit && ((jewels + next_step_cost) <= jewel_limit)))
 		{
 			jewels += next_step_cost;
 			int cards_to_draw = 0;
@@ -289,7 +293,7 @@ void step_up_summon(ofstream& F, int N, int jewel_limit, int success) {
 			steps++;
 		}
 		F << i + 1 << "\t" << jewels << "\t" << steps << "\t" << cards << "\t" << get << "\t" << alt << "\t" << UR;
-		if (use_jewel_limit == true) {
+		if (use_jewel_limit) {
 			if (get < success) F << "\t" << "no";
 			else F << "\t" << "yes";
 		}
@@ -307,7 +311,7 @@ void step_up_summon(ofstream& F, int N, int jewel_limit, int success) {
 
 void flip_dx_summon(ofstream& F, int N, int jewel_limit, int success)
 {
-	{
+		if (success == 0) success = 99999999;
 		bool use_jewel_limit;
 		if (jewel_limit == 0) use_jewel_limit = false;
 		else use_jewel_limit = true;
@@ -317,33 +321,38 @@ void flip_dx_summon(ofstream& F, int N, int jewel_limit, int success)
 			cards = 0,											//total nubmer of cards
 			UR = 0;                                             //other UR cards aquired
 		F << "Count" << "\t" << "jewels" << "\t" << "Cards" << "\t" << "Featured" << "\t" << "Other UR";
-		if (use_jewel_limit == true) F << "\t" << "success?";
+		if (use_jewel_limit) F << "\t" << "success?";
 		F << endl;
 		for (int i = 0; i < N; i++)
 		{
 			//if no jewel limit, run till sucess.  if jewel limit, either run till success OR run till out of jewels.
-			while ((get < success && use_jewel_limit == false) || (get < success && use_jewel_limit == true && ((jewels + 1400) <= jewel_limit)))
+			while ((get < success && !use_jewel_limit) || (get < success && use_jewel_limit && ((jewels + 1400) <= jewel_limit)))
 			{
 				jewels += 300;
 				cards += 1;
+				bool paid = false;
 				for (int j = 0; j < 6; j++)
 				{
 					if (rd(g) <= chance)
 					{
 						//ignore non-event URs by default, can add option to grab non-event URs later I guess
 						if (rd(g) <= 50) {
+							//if you aren't the first draw, you have to pay for your cards
 							if (j != 0)
 							{
-								jewels += 1100;
-								cards += 5;
+								//but you only pay once.  if you paid already don't pay again.
+								if (!paid) jewels += 1100;
+								if (!paid) cards += 5;
+								paid = true;
 							}
+							//in any case, congrats.
 							get++;
-						}
+						}	
 					}
 				}
 			}
 			F << i + 1 << "\t" << jewels << "\t" << cards << "\t" << get << "\t" << UR;
-			if (use_jewel_limit == true) {
+			if (use_jewel_limit) {
 				if (get < success) F << "\t" << "no";
 				else F << "\t" << "yes";
 			}
@@ -352,11 +361,11 @@ void flip_dx_summon(ofstream& F, int N, int jewel_limit, int success)
 			get = 0;
 			UR = 0;
 		}
-	}
 }
 
 void premium_hyper_summon(ofstream& F, int N, int jewel_limit, int success)
 {
+	if (success == 0) success = 99999999;
 	bool use_jewel_limit;
 	if (jewel_limit == 0) use_jewel_limit = false;
 	else use_jewel_limit = true;
@@ -370,7 +379,7 @@ void premium_hyper_summon(ofstream& F, int N, int jewel_limit, int success)
 	for (int i = 0; i < N; i++)
 	{
 		//if no jewel limit, run till sucess.  if jewel limit, either run till success OR run till out of jewels.
-		while ((get < success && use_jewel_limit == false) || (get < success && use_jewel_limit == true && ((jewels + 3000) <= jewel_limit)))
+		while ((get < success && !use_jewel_limit) || (get < success && use_jewel_limit && ((jewels + 3000) <= jewel_limit)))
 		{
 			jewels += 3000;
 			for (int j = 0; j < 11; j++)
@@ -385,7 +394,7 @@ void premium_hyper_summon(ofstream& F, int N, int jewel_limit, int success)
 			}
 		}
 		F << i + 1 << "\t" << jewels << "\t" << jewels * 11 / 3000 << "\t" << get << "\t" << UR;
-		if (use_jewel_limit == true) {
+		if (use_jewel_limit) {
 			if (get < success) F << "\t" << "no";
 			else F << "\t" << "yes";
 		}
@@ -418,7 +427,7 @@ int main(int argc, char** argv)
 		cin >> summon_type;
 		if (summon_type == 'S' || summon_type == 'B' || summon_type == 'F' || summon_type == 'P' || summon_type == 'U') valid_summon = true;
 		else cout << "please enter a valid summon type" << endl;
-	} while (valid_summon == false);
+	} while (!valid_summon);
 	
 	cout << endl;
 	cout << "enter how many runs to simulate:" << endl;
@@ -429,21 +438,21 @@ int main(int argc, char** argv)
 			cout << "please enter a positive number:" << endl;
 	} while (N < 1);
 
-	cout << endl << "Enter the target number of featured cards" << endl;
+	cout << endl << "Enter the target number of featured cards (0 for jewel mode)" << endl;
 	do
 	{
 		cin >> success;
-		if (success < 1)
+		if (success < 0)
 			cout << "please enter a positive number:" << endl;
-	} while (success < 1);
+	} while (success < 0);
 
 	cout << endl << "Enter a jewel limit (0 for no limit)" << endl;
 	do
 	{
 		cin >> jewel_limit;
-		if (jewel_limit < 0)
+		if (jewel_limit < 0 && success != 0 || jewel_limit < 3000)
 			cout << "please enter a positive number:" << endl;
-	} while (jewel_limit < 0);
+	} while (jewel_limit < 0 && success != 0 || jewel_limit < 3000);
 	if (summon_type == 'S')	special_summon(F, N, jewel_limit, success);
 	else if (summon_type == 'B')
 	{
