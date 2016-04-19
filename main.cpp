@@ -17,7 +17,7 @@ using namespace std;
 
 unsigned seed = chrono::system_clock::now().time_since_epoch().count();
 default_random_engine g(seed);
-uniform_int_distribution<unsigned> rd(1, 100);
+uniform_real_distribution<float> rd(0, 100);
 
 //provide F stream reference and number of iterations to run, special summon function.
 void special_summon(ofstream& F, int N, int jewel_limit, int success) {
