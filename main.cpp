@@ -53,7 +53,7 @@ void special_summon(ofstream& F, int N, int jewel_limit, int success) {
 			if (flag)
 				chance = 1;
 			else
-				chance += 5;
+				chance += 3;
 			flag = false;
 		}
 		F << i + 1 << "\t" << jewels << "\t" << jewels * 11 / 3000 << "\t" << get << "\t" << UR;
@@ -249,21 +249,21 @@ void step_up_summon(ofstream& F, int N, int jewel_limit, int success) {
 				cards += 1;
 				next_step_cost = 600;
 			}
-			if (steps % 4 == 1)
+			else if (steps % 4 == 1)
 			{
 				cards_to_draw = 3;
 				chance = 2;
 				cards += 3;
 				next_step_cost = 1200;
 			}
-			if (steps % 4 == 2)
+			else if (steps % 4 == 2)
 			{
 				cards_to_draw = 5;
 				chance = 3;
 				cards += 5;
 				next_step_cost = 3000;
 			}
-			if (steps % 4 == 3)
+			else if (steps % 4 == 3)
 			{
 				cards_to_draw = 10;
 				cards += 11;
@@ -309,6 +309,104 @@ void step_up_summon(ofstream& F, int N, int jewel_limit, int success) {
 	}
 }
 
+void limited_step_up_summon(ofstream& F, int N, int jewel_limit, int success) {
+	if (success == 0) success = 99999999;
+	bool use_jewel_limit;
+	if (jewel_limit == 0) use_jewel_limit = false;
+	else use_jewel_limit = true;
+	unsigned chance = 1,                                        //chance of getting an UR
+		jewels = 0,                                         //jewels spent
+		get = 0,                                            //event UR copies aquired
+		alt = 0,
+		UR = 0,												//other UR cards aquired
+		steps = 0,
+		cards = 0,
+		next_step_cost = 0;
+	bool flag = false;
+	F << "Count" << "\t" << "jewels" << "\t" << "steps" << "\t" << "Cards" << "\t" << "Featured" << "\t" << "Alt Featured" << "\t" << "Other UR";
+	if (use_jewel_limit) F << "\t" << "success?";
+	F << endl;
+	for (int i = 0; i < N; i++)
+	{
+		//if no jewel limit, run till sucess.  if jewel limit, either run till success OR run till out of jewels.
+		while ((get < success && !use_jewel_limit) || (get < success && use_jewel_limit && ((jewels + next_step_cost) <= jewel_limit)))
+		{
+			jewels += next_step_cost;
+			int cards_to_draw = 0;
+			if (steps % 5 == 0)
+			{
+				cards_to_draw = 1;
+				chance = 1;
+				cards += 1;
+				next_step_cost = 600;
+			}
+			else if (steps % 5 == 1)
+			{
+				cards_to_draw = 3;
+				chance = 2;
+				cards += 3;
+				next_step_cost = 1200;
+			}
+			else if (steps % 5 == 2)
+			{
+				cards_to_draw = 5;
+				chance = 3;
+				cards += 5;
+				next_step_cost = 2400;
+			}
+			else if (steps % 5 == 3)
+			{
+				cards_to_draw = 9;
+				cards += 9;
+				chance = 4;
+				next_step_cost = 3000;
+				
+			}
+			else if (steps % 5 == 4)
+			{
+				cards_to_draw = 10;
+				cards += 11;
+				chance = 4;
+				next_step_cost = 100;
+				if (rd(g) <= 50)
+					get++;
+				else
+					alt++;
+				
+			}
+			for (int j = 0; j < cards_to_draw; j++)
+			{
+				if (rd(g) <= chance)
+				{
+					int temp = rd(g);
+					if (temp <= 25)
+						get++;
+					else if (temp <= 50)
+						alt++;
+					else
+						UR++;
+				}
+			}
+			steps++;
+		}
+		F << i + 1 << "\t" << jewels << "\t" << steps << "\t" << cards << "\t" << get << "\t" << alt << "\t" << UR;
+		if (use_jewel_limit) {
+			if (get < success) F << "\t" << "no";
+			else F << "\t" << "yes";
+		}
+		F << endl;
+		steps = 0;
+		chance = 1;
+		jewels = 0;
+		alt = 0;
+		cards = 0;
+		next_step_cost = 0;
+		get = 0;
+		UR = 0;
+	}
+}
+
+
 void flip_dx_summon(ofstream& F, int N, int jewel_limit, int success)
 {
 		if (success == 0) success = 99999999;
@@ -325,12 +423,15 @@ void flip_dx_summon(ofstream& F, int N, int jewel_limit, int success)
 		F << endl;
 		for (int i = 0; i < N; i++)
 		{
+			int next_draw_cost = 100;
 			//if no jewel limit, run till sucess.  if jewel limit, either run till success OR run till out of jewels.
-			while ((get < success && !use_jewel_limit) || (get < success && use_jewel_limit && ((jewels + 1400) <= jewel_limit)))
+			while ((get < success && !use_jewel_limit) || (get < success && use_jewel_limit && ((jewels + 1100 + next_draw_cost) <= jewel_limit)))
 			{
-				jewels += 300;
+				jewels += next_draw_cost;
+				next_draw_cost = 300;
 				cards += 1;
 				bool paid = false;
+				int temp_ur = 0;
 				for (int j = 0; j < 6; j++)
 				{
 					if (rd(g) <= chance)
@@ -347,9 +448,15 @@ void flip_dx_summon(ofstream& F, int N, int jewel_limit, int success)
 							}
 							//in any case, congrats.
 							get++;
-						}	
+						}
+						else 
+						{
+							if (j != 0) temp_ur++;
+							else UR++;
+						}
 					}
 				}
+				if (paid) UR += temp_ur;
 			}
 			F << i + 1 << "\t" << jewels << "\t" << cards << "\t" << get << "\t" << UR;
 			if (use_jewel_limit) {
@@ -369,7 +476,7 @@ void premium_hyper_summon(ofstream& F, int N, int jewel_limit, int success)
 	bool use_jewel_limit;
 	if (jewel_limit == 0) use_jewel_limit = false;
 	else use_jewel_limit = true;
-	unsigned chance = 3,                                        //chance of getting an UR
+	unsigned chance = 7,                                        //chance of getting an UR
 		jewels = 0,                                         //jewels spent
 		get = 0,                                            //event UR copies aquired
 		UR = 0;                                             //other UR cards aquired
@@ -399,7 +506,6 @@ void premium_hyper_summon(ofstream& F, int N, int jewel_limit, int success)
 			else F << "\t" << "yes";
 		}
 		F << endl;
-		chance = 1;
 		jewels = 0;
 		get = 0;
 		UR = 0;
@@ -421,11 +527,11 @@ int main(int argc, char** argv)
 	//data tabulated in rows as: N (sim number) - jewels spent - amount of pulls - target UR copies aquired - other UR cads aquired
 	F.open("Last Sim.txt", ofstream::out | ofstream::trunc);
 
-	cout << "enter type of summon:" << endl << "S: Special Summon" << endl << "B: Box summon" << endl << "F: Flip DX summon" << endl << "U: Step Up summon" << endl;
+	cout << "enter type of summon:" << endl << "S: Special Summon" << endl << "B: Box summon" << endl << "F: Flip DX summon" << endl << "P: Premium Hyper summon" << endl << "U: Step Up summon" << endl << "L: Limited step-up summon" << endl;
 
 	do {
 		cin >> summon_type;
-		if (summon_type == 'S' || summon_type == 'B' || summon_type == 'F' || summon_type == 'P' || summon_type == 'U') valid_summon = true;
+		if (summon_type == 'S' || summon_type == 'B' || summon_type == 'F' || summon_type == 'P' || summon_type == 'U' || summon_type == 'L') valid_summon = true;
 		else cout << "please enter a valid summon type" << endl;
 	} while (!valid_summon);
 	
@@ -450,9 +556,9 @@ int main(int argc, char** argv)
 	do
 	{
 		cin >> jewel_limit;
-		if (jewel_limit < 0 && success != 0 || jewel_limit < 3000)
+		if (jewel_limit < 0 || (jewel_limit < 3000 && !success))
 			cout << "please enter a positive number:" << endl;
-	} while (jewel_limit < 0 && success != 0 || jewel_limit < 3000);
+	} while (jewel_limit < 0 || (jewel_limit < 3000 && !success));
 	if (summon_type == 'S')	special_summon(F, N, jewel_limit, success);
 	else if (summon_type == 'B')
 	{
@@ -469,5 +575,6 @@ int main(int argc, char** argv)
 	else if (summon_type == 'F') flip_dx_summon(F, N, jewel_limit, success);
 	else if (summon_type == 'P') premium_hyper_summon(F, N, jewel_limit, success);
 	else if (summon_type == 'U') step_up_summon(F, N, jewel_limit, success);
+	else if (summon_type == 'L') limited_step_up_summon(F, N, jewel_limit, success);
 	return 0;
 }
